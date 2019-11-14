@@ -21,7 +21,7 @@
  *        Wensong Zhang       :   added the long options
  *        Wensong Zhang       :   added the hostname and portname input
  *        Wensong Zhang       :   added the hostname and portname output
- *	  Lars Marowsky-Br�e  :   added persistence granularity support
+ *	  Lars Marowsky-Br�e  :   added persistence granularity support
  *        Julian Anastasov    :   fixed the (null) print for unknown services
  *        Wensong Zhang       :   added the port_to_anyname function
  *        Horms               :   added option to read commands from stdin
@@ -803,6 +803,7 @@ static int process_options(int argc, char **argv, int reading_stdin)
 		break;
 
 	case CMD_ADD:
+		//service添加
 		result = ipvs_add_service(&ce.svc);
 		break;
 
@@ -819,6 +820,7 @@ static int process_options(int argc, char **argv, int reading_stdin)
 		break;
 
 	case CMD_ADDDEST:
+		//dest添加
 		result = ipvs_add_dest(&ce.svc, &ce.dest);
 		break;
 
@@ -1211,6 +1213,7 @@ static void check_ipvs_version(void)
 	    IPVS_VERSION(MINIMUM_IPVS_VERSION_MAJOR,
 			 MINIMUM_IPVS_VERSION_MINOR,
 			 MINIMUM_IPVS_VERSION_PATCH)) {
+		//版本号过小
 		fprintf(stderr,
 			"Warning: IPVS version mismatch: \n"
 			"  Kernel compiled with IPVS version %d.%d.%d\n"

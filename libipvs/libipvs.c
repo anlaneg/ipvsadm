@@ -73,6 +73,7 @@ int ipvs_nl_send_message(struct nl_msg *msg, nl_recvmsg_msg_cb_t func, void *arg
 {
 	int err = EINVAL;
 
+	//打开netlink消息
 	sock = nl_handle_alloc();
 	if (!sock) {
 		nlmsg_free(msg);
@@ -136,6 +137,7 @@ int ipvs_init(void)
 	if ((sockfd = socket(AF_INET, SOCK_RAW, IPPROTO_RAW)) == -1)
 		return -1;
 
+	//取ipvs版本号
 	if (getsockopt(sockfd, IPPROTO_IP, IP_VS_SO_GET_INFO,
 		       (char *)&ipvs_info, &len))
 		return -1;
@@ -212,6 +214,7 @@ static int ipvs_nl_fill_service_attr(struct nl_msg *msg, ipvs_service_t *svc)
 	struct ip_vs_flags flags = { .flags = svc->flags,
 				     .mask = ~0 };
 
+	//service属性开始
 	nl_service = nla_nest_start(msg, IPVS_CMD_ATTR_SERVICE);
 	if (!nl_service)
 		return -1;
@@ -228,6 +231,7 @@ static int ipvs_nl_fill_service_attr(struct nl_msg *msg, ipvs_service_t *svc)
 
 	NLA_PUT_STRING(msg, IPVS_SVC_ATTR_SCHED_NAME, svc->sched_name);
 	if (svc->pe_name)
+		//persistence engine名称
 		NLA_PUT_STRING(msg, IPVS_SVC_ATTR_PE_NAME, svc->pe_name);
 	NLA_PUT(msg, IPVS_SVC_ATTR_FLAGS, sizeof(flags), &flags);
 	NLA_PUT_U32(msg, IPVS_SVC_ATTR_TIMEOUT, svc->timeout);
@@ -243,9 +247,10 @@ nla_put_failure:
 
 int ipvs_add_service(ipvs_service_t *svc)
 {
-	ipvs_func = ipvs_add_service;
+	ipvs_func = ipvs_add_sevice;
 #ifdef LIBIPVS_USE_NL
 	if (try_nl) {
+		//尝试netlink类消息
 		struct nl_msg *msg = ipvs_nl_message(IPVS_CMD_NEW_SERVICE, 0);
 		if (!msg) return -1;
 		if (ipvs_nl_fill_service_attr(msg, svc)) {

@@ -131,11 +131,12 @@ struct ip_vs_service_user {
 	u_int32_t		fwmark;		/* firwall mark of service */
 
 	/* virtual service options */
+	//调度器名称
 	char			sched_name[IP_VS_SCHEDNAME_MAXLEN];
 	unsigned		flags;		/* virtual service flags */
 	unsigned		timeout;	/* persistent timeout in sec */
 	__be32			netmask;	/* persistent netmask */
-	u_int16_t		af;
+	u_int16_t		af;//协议族
 	union nf_inet_addr	addr;
 	char			pe_name[IP_VS_PENAME_MAXLEN];
 };
