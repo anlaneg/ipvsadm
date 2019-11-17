@@ -78,6 +78,7 @@
 #define IP_VS_CONN_F_MASQ	0x0000		/* masquerading/NAT */
 #define IP_VS_CONN_F_LOCALNODE	0x0001		/* local node */
 #define IP_VS_CONN_F_TUNNEL	0x0002		/* tunneling */
+//dr转发方式
 #define IP_VS_CONN_F_DROUTE	0x0003		/* direct routing */
 #define IP_VS_CONN_F_BYPASS	0x0004		/* cache bypass */
 #define IP_VS_CONN_F_SYNC	0x0020		/* entry created by sync */

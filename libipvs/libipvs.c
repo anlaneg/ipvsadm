@@ -171,6 +171,7 @@ int ipvs_getinfo(void)
 
 #ifdef LIBIPVS_USE_NL
 	if (try_nl) {
+	    //通过netlink获取info
 		struct nl_msg *msg;
 		msg = ipvs_nl_message(IPVS_CMD_GET_INFO, 0);
 		if (msg)
@@ -362,6 +363,7 @@ int ipvs_add_dest(ipvs_service_t *svc, ipvs_dest_t *dest)
 #ifdef LIBIPVS_USE_NL
 	ipvs_func = ipvs_add_dest;
 	if (try_nl) {
+	    //添加real server
 		struct nl_msg *msg = ipvs_nl_message(IPVS_CMD_NEW_DEST, 0);
 		if (!msg) return -1;
 		if (ipvs_nl_fill_service_attr(msg, svc))

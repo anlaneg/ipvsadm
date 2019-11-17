@@ -124,11 +124,14 @@
 #define MAX_TIMEOUT		(86400*31)	/* 31 days */
 
 #define CMD_NONE		0
+//service添加
 #define CMD_ADD			(CMD_NONE+1)
+//service更新
 #define CMD_EDIT		(CMD_NONE+2)
 #define CMD_DEL			(CMD_NONE+3)
 #define CMD_FLUSH		(CMD_NONE+4)
 #define CMD_LIST		(CMD_NONE+5)
+//realserver添加
 #define CMD_ADDDEST		(CMD_NONE+6)
 #define CMD_DELDEST		(CMD_NONE+7)
 #define CMD_EDITDEST		(CMD_NONE+8)
@@ -262,7 +265,9 @@ static const char commands_v_options[NUMBER_OF_CMD][NUMBER_OF_OPT] =
 
 struct ipvs_command_entry {
 	int			cmd;
+	//service配置
 	ipvs_service_t		svc;
+	//realserver配置
 	ipvs_dest_t		dest;
 	ipvs_timeout_t		timeout;
 	ipvs_daemon_t		daemon;
@@ -331,6 +336,7 @@ int main(int argc, char **argv)
 	int result;
 
 	if (ipvs_init()) {
+	    //如果初始化失败，则加载ip_vs模块后再试
 		/* try to insmod the ip_vs module if ipvs_init failed */
 		if (modprobe_ipvs() || ipvs_init())
 			fail(2, "Can't initialize ipvs: %s\n"
@@ -365,6 +371,7 @@ parse_options(int argc, char **argv, struct ipvs_command_entry *ce,
 	poptContext context;
 	char *optarg=NULL;
 	struct poptOption options_table[] = {
+	    //长名称，短名称，参数flag,参数，
 		{ "add-service", 'A', POPT_ARG_NONE, NULL, 'A', NULL, NULL },
 		{ "edit-service", 'E', POPT_ARG_NONE, NULL, 'E', NULL, NULL },
 		{ "delete-service", 'D', POPT_ARG_NONE, NULL, 'D', NULL, NULL },
@@ -474,6 +481,7 @@ parse_options(int argc, char **argv, struct ipvs_command_entry *ce,
 		set_command(&ce->cmd, CMD_SAVE);
 		break;
 	case TAG_START_DAEMON:
+	    //daemon的主备指定
 		set_command(&ce->cmd, CMD_STARTDAEMON);
 		if (!strcmp(optarg, "master"))
 			ce->daemon.state = IP_VS_STATE_MASTER;
@@ -503,6 +511,7 @@ parse_options(int argc, char **argv, struct ipvs_command_entry *ce,
 		switch (c) {
 		case 't':
 		case 'u':
+		    //协议配置，vip,vport配置
 			set_option(options, OPT_SERVICE);
 			ce->svc.protocol =
 				(c=='t' ? IPPROTO_TCP : IPPROTO_UDP);
@@ -512,6 +521,7 @@ parse_options(int argc, char **argv, struct ipvs_command_entry *ce,
 				     "address[:port] specified");
 			break;
 		case 'f':
+		    //firewall mark配置
 			set_option(options, OPT_SERVICE);
 			/*
 			 * Set protocol to a sane values, even
@@ -522,6 +532,7 @@ parse_options(int argc, char **argv, struct ipvs_command_entry *ce,
 			ce->svc.fwmark = parse_fwmark(optarg);
 			break;
 		case 's':
+		    //设置sched_name
 			set_option(options, OPT_SCHEDULER);
 			strncpy(ce->svc.sched_name,
 				optarg, IP_VS_SCHEDNAME_MAXLEN);
@@ -729,6 +740,7 @@ static int process_options(int argc, char **argv, int reading_stdin)
 	/* Set the default weight 1 */
 	ce.dest.weight = 1;
 	/* Set direct routing as default forwarding method */
+	//设置dr为默认的转发方式
 	ce.dest.conn_flags = IP_VS_CONN_F_DROUTE;
 	/* Set the default persistent granularity to /32 mask */
 	ce.svc.netmask = ((u_int32_t) 0xffffffff);
@@ -770,6 +782,7 @@ static int process_options(int argc, char **argv, int reading_stdin)
 			ce.dest.port = ce.svc.port;
 	}
 
+	//按各cmd执行
 	switch (ce.cmd) {
 	case CMD_LIST:
 		if ((options & (OPT_CONNECTION|OPT_TIMEOUT|OPT_DAEMON) &&
@@ -956,6 +969,7 @@ parse_service(char *buf, ipvs_service_t *svc)
 		else
 			return SERVICE_NONE;
 	}
+	//地址填充（ipv6,ipv4)
 	if (inet_pton(AF_INET6, buf, &inaddr6) > 0) {
 		svc->addr.in6 = inaddr6;
 		svc->af = AF_INET6;
@@ -977,6 +991,7 @@ parse_service(char *buf, ipvs_service_t *svc)
 
 	result |= SERVICE_ADDR;
 
+	//port转换
 	if (portp != NULL) {
 		result |= SERVICE_PORT;
 
@@ -1035,6 +1050,7 @@ opt2name(int option)
 	return *ptr;
 }
 
+//设置command
 static void
 set_command(int *cmd, const int newcmd)
 {
@@ -1183,7 +1199,7 @@ static void fail(int err, char *msg, ...)
 	exit(err);
 }
 
-
+//加载ip_vs modules
 static int modprobe_ipvs(void)
 {
 	char *argv[] = { "/sbin/modprobe", "--", "ip_vs", NULL };
